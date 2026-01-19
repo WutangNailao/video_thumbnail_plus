@@ -7,7 +7,7 @@ This plugin generates image thumbnails from video files or URLs on both Android 
   [![pub ver](https://img.shields.io/badge/pub-v0.5.6-blue)](https://pub.dev/packages/video_thumbnail)
   [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/justsoft/)
 
-![video-file](https://github.com/justsoft/video_thumbnail/blob/master/video_file.png?raw=true) ![video-url](https://github.com/justsoft/video_thumbnail/blob/master/video_url.png?raw=true)
+![video-file](video_file.png) ![video-url](video_url.png)
 
 ## Methods
 |function|parameter|description|return|
