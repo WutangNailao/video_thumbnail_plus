@@ -1,4 +1,4 @@
-# video_thumbnail_plus (Base on [video_thumbnail](https://github.com/justsoft/video_thumbnail.git))
+# video_thumbnail_plus (Based on [video_thumbnail](https://github.com/justsoft/video_thumbnail.git))
 
 Solved some known bugs of [video_thumnail](https://github.com/justsoft/video_thumbnail.git)
 
