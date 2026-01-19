@@ -5,23 +5,45 @@ import io.flutter.plugin.common.MethodChannel
 import org.mockito.Mockito
 import kotlin.test.Test
 
-/*
- * This demonstrates a simple unit test of the Kotlin portion of this plugin's implementation.
- *
- * Once you have built the plugin's example app, you can run these tests from the command
- * line by running `./gradlew testDebugUnitTest` in the `example/android/` directory, or
- * you can run them directly from IDEs that support JUnit such as Android Studio.
- */
-
 internal class VideoThumbnailPlusPluginTest {
     @Test
-    fun onMethodCall_getPlatformVersion_returnsExpectedValue() {
+    fun onMethodCall_invalidMethod_returnsNotImplemented() {
         val plugin = VideoThumbnailPlusPlugin()
 
-        val call = MethodCall("getPlatformVersion", null)
+        val call = MethodCall("unknownMethod", null)
         val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
         plugin.onMethodCall(call, mockResult)
 
-        Mockito.verify(mockResult).success("Android " + android.os.Build.VERSION.RELEASE)
+        Mockito.verify(mockResult).notImplemented()
+    }
+
+    @Test
+    fun onMethodCall_file_withoutVideo_returnsError() {
+        val plugin = VideoThumbnailPlusPlugin()
+
+        val call = MethodCall("file", mapOf<String, Any>())
+        val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+        plugin.onMethodCall(call, mockResult)
+
+        Mockito.verify(mockResult).error(
+            Mockito.eq("INVALID_ARGUMENT"),
+            Mockito.eq("Video path or URL is required"),
+            Mockito.isNull()
+        )
+    }
+
+    @Test
+    fun onMethodCall_data_withoutVideo_returnsError() {
+        val plugin = VideoThumbnailPlusPlugin()
+
+        val call = MethodCall("data", mapOf<String, Any>())
+        val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+        plugin.onMethodCall(call, mockResult)
+
+        Mockito.verify(mockResult).error(
+            Mockito.eq("INVALID_ARGUMENT"),
+            Mockito.eq("Video path or URL is required"),
+            Mockito.isNull()
+        )
     }
 }

@@ -1,7 +1,7 @@
 import Flutter
 import UIKit
 import AVFoundation
-import CommonCrypto
+import CryptoKit
 
 public class VideoThumbnailPlusPlugin: NSObject, FlutterPlugin {
     private static let FORMAT_JPEG = 0
@@ -36,14 +36,17 @@ public class VideoThumbnailPlusPlugin: NSObject, FlutterPlugin {
     }
 
     private func handleThumbnailFile(args: [String: Any], result: @escaping FlutterResult) {
-        let video = args["video"] as? String ?? ""
+        guard let video = args["video"] as? String, !video.isEmpty else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "Video path or URL is required", details: nil))
+            return
+        }
         let headers = args["headers"] as? [String: String] ?? [:]
         let path = args["path"] as? String ?? ""
         let format = args["format"] as? Int ?? VideoThumbnailPlusPlugin.FORMAT_PNG
         let maxHeight = args["maxh"] as? Int ?? 0
         let maxWidth = args["maxw"] as? Int ?? 0
-        let timeMs = args["timeMs"] as? Int ?? 0
-        let quality = args["quality"] as? Int ?? 100
+        let timeMs = max(0, args["timeMs"] as? Int ?? 0)
+        let quality = min(100, max(0, args["quality"] as? Int ?? 100))
 
         queue.async {
             do {
@@ -69,13 +72,16 @@ public class VideoThumbnailPlusPlugin: NSObject, FlutterPlugin {
     }
 
     private func handleThumbnailData(args: [String: Any], result: @escaping FlutterResult) {
-        let video = args["video"] as? String ?? ""
+        guard let video = args["video"] as? String, !video.isEmpty else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "Video path or URL is required", details: nil))
+            return
+        }
         let headers = args["headers"] as? [String: String] ?? [:]
         let format = args["format"] as? Int ?? VideoThumbnailPlusPlugin.FORMAT_PNG
         let maxHeight = args["maxh"] as? Int ?? 0
         let maxWidth = args["maxw"] as? Int ?? 0
-        let timeMs = args["timeMs"] as? Int ?? 0
-        let quality = args["quality"] as? Int ?? 100
+        let timeMs = max(0, args["timeMs"] as? Int ?? 0)
+        let quality = min(100, max(0, args["quality"] as? Int ?? 100))
 
         queue.async {
             do {
@@ -130,8 +136,8 @@ public class VideoThumbnailPlusPlugin: NSObject, FlutterPlugin {
             fileExtension = "png"
             imageData = image.pngData()
         case VideoThumbnailPlusPlugin.FORMAT_WEBP:
-            fileExtension = "webp"
-            // iOS doesn't have native WebP support, fallback to PNG
+            // iOS doesn't have native WebP encoding support, fallback to PNG with correct extension
+            fileExtension = "png"
             imageData = image.pngData()
         default:
             fileExtension = "png"
@@ -146,7 +152,9 @@ public class VideoThumbnailPlusPlugin: NSObject, FlutterPlugin {
         if !path.isEmpty {
             outputDir = URL(fileURLWithPath: path)
         } else {
-            let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+            guard let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+                throw NSError(domain: "VideoThumbnailPlus", code: -4, userInfo: [NSLocalizedDescriptionKey: "Failed to get cache directory"])
+            }
             outputDir = cacheDir.appendingPathComponent("video_thumbnails")
         }
 
@@ -229,8 +237,9 @@ public class VideoThumbnailPlusPlugin: NSObject, FlutterPlugin {
 
         let generator = AVAssetImageGenerator(asset: asset)
         generator.appliesPreferredTrackTransform = true
-        generator.requestedTimeToleranceAfter = .zero
-        generator.requestedTimeToleranceBefore = .zero
+        // Use default tolerance for better performance; .zero would require exact frame decoding
+        generator.requestedTimeToleranceAfter = CMTime(seconds: 1, preferredTimescale: 600)
+        generator.requestedTimeToleranceBefore = CMTime(seconds: 1, preferredTimescale: 600)
 
         if maxWidth > 0 || maxHeight > 0 {
             let width = maxWidth > 0 ? maxWidth : maxHeight
@@ -250,10 +259,7 @@ public class VideoThumbnailPlusPlugin: NSObject, FlutterPlugin {
 
     private func md5(_ string: String) -> String {
         let data = Data(string.utf8)
-        var digest = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
-        data.withUnsafeBytes {
-            _ = CC_MD5($0.baseAddress, CC_LONG(data.count), &digest)
-        }
+        let digest = Insecure.MD5.hash(data: data)
         return digest.map { String(format: "%02x", $0) }.joined()
     }
 }
