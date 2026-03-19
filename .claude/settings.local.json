@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "Bash(dart analyze:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(fvm flutter analyze:*)",
+      "Bash(fvm flutter pub get:*)",
+      "Bash(fvm flutter test:*)"
+    ]
+  }
+}

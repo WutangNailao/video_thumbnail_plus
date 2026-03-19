@@ -95,16 +95,16 @@ Future<ThumbnailResult> genThumbnail(ThumbnailRequest r) async {
     bytes = data;
   }
 
-  int _imageDataSize = bytes.length;
-  print("image size: $_imageDataSize");
+  int imageDataSize = bytes.length;
+  print("image size: $imageDataSize");
 
-  final _image = Image.memory(bytes);
-  _image.image
+  final image = Image.memory(bytes);
+  image.image
       .resolve(ImageConfiguration())
       .addListener(ImageStreamListener((ImageInfo info, bool _) {
     completer.complete(ThumbnailResult(
-      image: _image,
-      dataSize: _imageDataSize,
+      image: image,
+      dataSize: imageDataSize,
       height: info.image.height,
       width: info.image.width,
     ));
@@ -119,7 +119,7 @@ class GenThumbnailImage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _GenThumbnailImageState createState() => _GenThumbnailImageState();
+  State<GenThumbnailImage> createState() => _GenThumbnailImageState();
 }
 
 class _GenThumbnailImageState extends State<GenThumbnailImage> {
@@ -129,23 +129,23 @@ class _GenThumbnailImageState extends State<GenThumbnailImage> {
       future: genThumbnail(widget.thumbnailRequest),
       builder: (BuildContext context, AsyncSnapshot<ThumbnailResult> snapshot) {
         if (snapshot.hasData) {
-          final _image = snapshot.data!.image;
-          final _width = snapshot.data!.width;
-          final _height = snapshot.data!.height;
-          final _dataSize = snapshot.data!.dataSize;
+          final image = snapshot.data!.image;
+          final width = snapshot.data!.width;
+          final height = snapshot.data!.height;
+          final dataSize = snapshot.data!.dataSize;
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Center(
                 child: Text(
-                    "Image ${widget.thumbnailRequest.thumbnailPath == null ? 'data size' : 'file size'}: $_dataSize, width:$_width, height:$_height"),
+                    "Image ${widget.thumbnailRequest.thumbnailPath == null ? 'data size' : 'file size'}: $dataSize, width:$width, height:$height"),
               ),
               Container(
                 color: Colors.grey,
                 height: 1.0,
               ),
-              _image,
+              image,
             ],
           );
         } else if (snapshot.hasError) {
@@ -183,7 +183,7 @@ class ImageInFile extends StatelessWidget {
 
 class DemoHome extends StatefulWidget {
   @override
-  _DemoHomeState createState() => _DemoHomeState();
+  State<DemoHome> createState() => _DemoHomeState();
 }
 
 class _DemoHomeState extends State<DemoHome> {
@@ -213,7 +213,7 @@ class _DemoHomeState extends State<DemoHome> {
 
   @override
   Widget build(BuildContext context) {
-    final _settings = <Widget>[
+    final settings = <Widget>[
       Slider(
         value: _sizeH * 1.0,
         onChanged: (v) => setState(() {
@@ -365,12 +365,12 @@ class _DemoHomeState extends State<DemoHome> {
                 },
               ),
             ),
-            for (var i in _settings) i,
+            for (var i in settings) i,
             Expanded(
               child: Container(
                 color: Colors.grey[300],
                 child: Scrollbar(
-                      child: ListView(
+                  child: ListView(
                     shrinkWrap: true,
                     children: <Widget>[
                       (_futreImage != null) ? _futreImage! : SizedBox(),
@@ -393,7 +393,7 @@ class _DemoHomeState extends State<DemoHome> {
                   )
                 ],
               ),
-              for (var i in _settings) i,
+              for (var i in settings) i,
             ],
           ),
         ),
